@@ -18,7 +18,7 @@ export default function LoginForm() {
         setLoading(true);
 
         try {
-            // ZATÍM jen test – později vyměníš za /api/auth/login
+
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
