@@ -3,7 +3,11 @@
 import { useState } from "react";
 
 export default function LoginForm() {
-    const [email, setEmail] = useState("");
+
+    const state = useState("");
+    const email = state[0];
+    const setEmail = state[1];
+
     const [password, setPassword] = useState("");
     const [msg, setMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -22,16 +26,19 @@ export default function LoginForm() {
             });
 
             const data = await res.json();
+
             if (!res.ok) {
-                setMsg(data.error ?? "Špatné přihlašovací údaje.");
+                setMsg(data.error ?? "Špatné přihlašovací údaje");
                 return;
             }
 
-            setMsg("Přihlášení OK ✅");
+            setMsg("Přihlášení proběhlo úspěšně");
             // později: router.push("/dashboard")
-        } catch {
-            setMsg("Nepodařilo se připojit k serveru.");
-        } finally {
+        }
+        catch {
+            setMsg("Nepodařilo se připojit k serveru");
+        }
+        finally {
             setLoading(false);
         }
     }
