@@ -23,7 +23,7 @@ function Navbar() {
     return (
         <nav className="w-full border-b px-6 py-4">
             <div className="max-w-6xl mx-auto flex items-center justify-between">
-                <span className="text-xl font-bold">Ezil3arn</span>
+                <span className="text-xl font-bold">StudujChytře.cz</span>
 
                 <ul className="flex gap-6 text-sm">
                     <Link href="/">
