@@ -17,8 +17,13 @@ export async function POST(req: Request) {
     }
 
     const user = await prisma.user.create({
-        data: { email, name },
+        data: {
+            email,
+            name,
+            password: "", // jen dočasně, pokud zatím nehashuješ
+        },
     });
+
 
     return Response.json(user, { status: 201 });
 }

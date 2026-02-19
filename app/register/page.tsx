@@ -1,7 +1,7 @@
 import Link from "next/link";
-import LoginForm from "@/components/Login";
+import RegisterForm from "@/components/Register";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     return (
         <section className="relative overflow-hidden bg-white text-neutral-900">
             {/* background decoration */}
@@ -16,37 +16,43 @@ export default function LoginPage() {
                     <div className="mb-6 text-center">
                         <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-sm text-neutral-700 shadow-sm backdrop-blur">
               <span className="inline-flex h-6 items-center rounded-full bg-neutral-900 px-2 text-xs font-semibold text-white">
-                Login
+                Register
               </span>
-                            <span className="font-medium">Vítej zpět</span>
+                            <span className="font-medium">Vytvoř si účet</span>
                         </div>
 
                         <h1 className="mt-5 text-3xl font-extrabold tracking-tight">
-                            Přihlášení
+                            Registrace
                         </h1>
+
                         <p className="mt-2 text-sm text-neutral-600">
-                            Přihlas se a pokračuj tam, kde jsi skončil.
+                            Začni zdarma a měj učení pod kontrolou.
                         </p>
                     </div>
 
                     {/* card */}
                     <div className="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm backdrop-blur">
-                        <LoginForm />
+                        <RegisterForm />
 
                         <div className="mt-5 flex items-center justify-between text-sm">
-                            <Link href="/register" className="text-neutral-700 hover:text-neutral-900 hover:underline">
-                                Nemáš účet? Zaregistruj se
+                            <Link
+                                href="/login"
+                                className="text-neutral-700 hover:text-neutral-900 hover:underline"
+                            >
+                                Už máš účet? Přihlas se
                             </Link>
 
-                            <Link href="/" className="text-neutral-500 hover:text-neutral-700 hover:underline">
+                            <Link
+                                href="/"
+                                className="text-neutral-500 hover:text-neutral-700 hover:underline"
+                            >
                                 Zpět na úvod
                             </Link>
                         </div>
                     </div>
 
-                    {/* small footer note */}
                     <p className="mt-6 text-center text-xs text-neutral-500">
-                        Přihlášením souhlasíš s podmínkami používání a zásadami soukromí.
+                        Registrací souhlasíš s podmínkami používání a zásadami soukromí.
                     </p>
                 </div>
             </div>

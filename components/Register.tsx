@@ -1,20 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function LoginForm() {
+export default function RegisterForm() {
+    const router = useRouter();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirm, setConfirm] = useState("");
     const [msg, setMsg] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    async function handleSubmit(e: React.FormEvent) {
+    async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
         setMsg(null);
-        setLoading(true);
 
+        if (password !== confirm) {
+            setMsg("Hesla se neshodují.");
+            return;
+        }
+
+        setLoading(true);
         try {
-            const res = await fetch("/api/auth/login", {
+            const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
@@ -23,21 +32,20 @@ export default function LoginForm() {
             const data = await res.json();
 
             if (!res.ok) {
-                setMsg(data.error ?? "Špatné přihlašovací údaje");
+                setMsg(data?.error ?? "Registrace se nepovedla.");
                 return;
             }
 
-            setMsg("Přihlášení proběhlo úspěšně ✅");
-            // později: router.push("/dashboard")
+            router.push("/login");
         } catch {
-            setMsg("Nepodařilo se připojit k serveru.");
+            setMsg("Chyba připojení.");
         } finally {
             setLoading(false);
         }
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
             {/* Email */}
             <div className="space-y-1">
                 <label className="text-xs font-medium text-neutral-700">Email</label>
@@ -58,20 +66,24 @@ export default function LoginForm() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="min. 6–8 znaků"
                     className="w-full rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none placeholder:text-neutral-400 focus:border-black/20 focus:ring-4 focus:ring-black/5 transition"
                     required
                 />
             </div>
 
-            {/* Button */}
-            <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 hover:shadow-md disabled:opacity-60 disabled:hover:bg-neutral-900 transition"
-            >
-                {loading ? "Přihlašuji…" : "Přihlásit se"}
-            </button>
+            {/* Confirm */}
+            <div className="space-y-1">
+                <label className="text-xs font-medium text-neutral-700">Potvrdit heslo</label>
+                <input
+                    type="password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    placeholder="zopakuj heslo"
+                    className="w-full rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none placeholder:text-neutral-400 focus:border-black/20 focus:ring-4 focus:ring-black/5 transition"
+                    required
+                />
+            </div>
 
             {/* Message */}
             {msg && (
@@ -79,6 +91,19 @@ export default function LoginForm() {
                     {msg}
                 </div>
             )}
+
+            {/* Button */}
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 hover:shadow-md disabled:opacity-60 disabled:hover:bg-neutral-900 transition"
+            >
+                {loading ? "Registruji…" : "Registruj se"}
+            </button>
+
+            <p className="text-center text-xs text-neutral-500">
+                Registrací souhlasíš s podmínkami používání.
+            </p>
         </form>
     );
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "../components/Navbar";
+
 import Link from "next/link";
 
 const geistSans = Geist({
@@ -19,31 +21,7 @@ export const metadata: Metadata = {
 };
 
 
-function Navbar() {
-    return (
-        <nav className="w-full border-b px-6 py-4">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
-                <span className="text-xl font-bold">StudujChytře.cz</span>
 
-                <ul className="flex gap-6 text-sm">
-                    <Link href="/">
-                        <li className="hover:underline cursor-pointer">Home</li>
-                    </Link>
-                    <Link href="/learn">
-                        <li className="hover:underline cursor-pointer">Learn</li>
-                    </Link>
-                    <Link href="/about">
-                        <li className="hover:underline cursor-pointer">About</li>
-                    </Link>
-                    <Link href="/login" className="hover:underline">
-                        Login
-                    </Link>
-
-                </ul>
-            </div>
-        </nav>
-    );
-}
 
 export default function RootLayout({
                                        children,
@@ -51,7 +29,7 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Navbar />
+        <Navbar/>
         {children}
         </body>
         </html>
