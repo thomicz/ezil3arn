@@ -3,7 +3,7 @@ import Statistics from "@/components/Statistics";
 
 export default function Hero() {
     return (
-        <section className="relative overflow-hidden bg-white text-neutral-900">
+        <section className="relative pt-15 overflow-hidden bg-white text-neutral-900">
             {/* background decoration */}
             <div className="pointer-events-none absolute inset-0">
                 {/* soft gradient */}
