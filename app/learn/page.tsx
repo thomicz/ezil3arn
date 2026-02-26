@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function LearnPage() {
     return (
         <section className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-white text-neutral-900">
-            {/* subtle background (jiné než about: bez velkého hero badge) */}
+            {/* Lehká dekorace pozadí*/}
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute -top-32 right-[-120px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-emerald-200 via-sky-200 to-indigo-200 blur-3xl opacity-35" />
                 <div className="absolute -bottom-40 left-[-140px] h-[520px] w-[520px] rounded-full bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 blur-3xl opacity-25" />
@@ -21,19 +21,7 @@ export default function LearnPage() {
                         </p>
                     </div>
 
-                    {/* fake search (UI only) */}
-                    <div className="w-full sm:w-[360px]">
-                        <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white/70 px-4 py-3 shadow-sm backdrop-blur">
-                            <span className="text-neutral-400">⌕</span>
-                            <input
-                                className="w-full bg-transparent text-sm outline-none placeholder:text-neutral-400"
-                                placeholder="Hledej téma (např. optika, SQL, derivace...)"
-                            />
-                        </div>
-                        <p className="mt-2 text-xs text-neutral-500">
-                            Tip: zkus napsat předmět nebo kapitolu.
-                        </p>
-                    </div>
+
                 </div>
 
                 {/* main modules */}

@@ -45,7 +45,7 @@ export default function LoginForm() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="např. tomas@email.cz"
+                    placeholder="např. email@email.cz"
                     className="w-full rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-neutral-900 shadow-sm outline-none placeholder:text-neutral-400 focus:border-black/20 focus:ring-4 focus:ring-black/5 transition"
                     required
                 />

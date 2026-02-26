@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import useAuth from "../app/hooks/useAuth";
 
 export default function Navbar() {
+    const { user, loading } = useAuth();
+
     return (
         <header className="sticky top-0 z-50 w-full">
             <div className="bg-white/60 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50">
@@ -50,19 +55,29 @@ export default function Navbar() {
 
                             <div className="mx-1 h-6 w-px bg-black/10" />
 
-                            <Link
-                                href="/login"
-                                className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white/70 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm hover:bg-white hover:shadow-md transition"
-                            >
-                                Přihlásit se
-                            </Link>
 
-                            <Link
-                                href="/register"
-                                className="inline-flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 hover:shadow-md transition"
-                            >
-                                Začít zdarma <span className="ml-2 opacity-80">→</span>
-                            </Link>
+                            {/* Přihlášený nebo nepřihlášený */}
+                            {loading ? null : user ? (
+                                <span className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white/70 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm">
+                  {user.email}
+                </span>
+                            ) : (
+                                <>
+                                    <Link
+                                        href="/login"
+                                        className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white/70 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm hover:bg-white hover:shadow-md transition"
+                                    >
+                                        Přihlásit se
+                                    </Link>
+
+                                    <Link
+                                        href="/register"
+                                        className="inline-flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 hover:shadow-md transition"
+                                    >
+                                        Začít zdarma <span className="ml-2 opacity-80">→</span>
+                                    </Link>
+                                </>
+                            )}
                         </div>
 
                         {/* Mobile */}
