@@ -13,7 +13,7 @@ export async function GET(req: Request) {
         return NextResponse.json({ loggedIn: false });
     }
 
-    //Zkontroluje, zda je token platný
+    //Zkontroluju, zda je token platný
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!);
         return NextResponse.json({ loggedIn: true, user: decoded });

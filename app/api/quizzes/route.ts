@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic"; // ať se to nechová jako cache
+export const dynamic = "force-dynamic";
 
 export async function GET() {
     return NextResponse.json({

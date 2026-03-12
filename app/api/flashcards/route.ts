@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic"; // aby se to v dev/prod nechovalo jako cache
+export const dynamic = "force-dynamic";
 
 export async function GET() {
     // Testovací data – později nahradíš tím, co budeš generovat z backendu
