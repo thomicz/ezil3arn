@@ -282,7 +282,7 @@ export default function LearnPage() {
                                 </div>
 
                                 <Link
-                                    href="/learn/upload?id=7"
+                                    href="/learn/upload?id=2"
                                     className="group/btn shrink-0 inline-flex items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:bg-neutral-800 hover:shadow-xl hover:scale-[1.02]"
                                 >
                                     Nahrát

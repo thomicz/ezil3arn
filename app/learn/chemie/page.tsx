@@ -125,7 +125,7 @@ function QuizSidebar() {
                     return (
                         <Link
                             key={quiz.id}
-                            href={`/learn/quiz/${quiz.id}`}
+                            href={`/learn/chemie/quizzes/${quiz.id}`}
                             className="group block rounded-2xl border border-transparent bg-neutral-50 p-4 transition-all duration-200 hover:border-neutral-200 hover:bg-white hover:shadow-sm"
                         >
                             <div className="flex items-start justify-between gap-2">
@@ -172,7 +172,7 @@ function QuizSidebar() {
             </div>
 
             <Link
-                href="/learn/quizzes"
+                href="quizzes"
                 className="mt-4 flex items-center justify-center gap-1.5 rounded-2xl border border-neutral-200 bg-white py-2.5 text-sm font-medium text-neutral-700 transition-all duration-200 hover:bg-neutral-50 hover:border-neutral-300"
             >
                 Zobrazit vše
@@ -282,7 +282,7 @@ export default function LearnPage() {
                                 </div>
 
                                 <Link
-                                    href="/learn/upload?id=7"
+                                    href="/learn/upload?id=4"
                                     className="group/btn shrink-0 inline-flex items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:bg-neutral-800 hover:shadow-xl hover:scale-[1.02]"
                                 >
                                     Nahrát
