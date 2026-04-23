@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react"; // 1. Přidán useState
 import Link from "next/link";
 import useAuth from "../app/hooks/useAuth";
 
 export default function Navbar() {
     const { user, loading } = useAuth();
+    const [isOpen, setIsOpen] = useState(false); // 2. State pro mobilní menu
+
+    const toggleMenu = () => setIsOpen(!isOpen);
 
     return (
         <header className="sticky top-0 z-50 w-full">
@@ -19,94 +23,81 @@ export default function Navbar() {
                             href="/"
                             className="group flex items-center gap-3 font-semibold tracking-tight text-neutral-900"
                         >
-              <span className="relative grid h-10 w-10 place-items-center rounded-2xl border border-black/10 bg-white/70 shadow-sm transition group-hover:shadow-md">
-                <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-gradient-to-br from-indigo-400 to-pink-400 opacity-80" />
-                <span className="text-sm font-extrabold">SC</span>
-              </span>
-
+                            <span className="relative grid h-10 w-10 place-items-center rounded-2xl border border-black/10 bg-white/70 shadow-sm transition group-hover:shadow-md">
+                                <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-gradient-to-br from-indigo-400 to-pink-400 opacity-80" />
+                                <span className="text-sm font-extrabold">SC</span>
+                            </span>
                             <span className="text-base sm:text-lg">
-                StudujChytře<span className="text-neutral-400">.cz</span>
-              </span>
+                                StudujChytře<span className="text-neutral-400">.cz</span>
+                            </span>
                         </Link>
 
-                        {/* Desktop */}
+                        {/* Desktop Navigation (skryto na mobilu) */}
                         <div className="hidden items-center gap-3 md:flex">
-                            {/* Pill navigation */}
                             <div className="flex items-center gap-1 rounded-2xl border border-black/10 bg-white/60 p-1 shadow-sm">
-                                <Link
-                                    href="/"
-                                    className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 hover:text-neutral-900 transition"
-                                >
-                                    Úvod
-                                </Link>
-                                <Link
-                                    href="/learn"
-                                    className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 hover:text-neutral-900 transition"
-                                >
-                                    Učení
-                                </Link>
-                                <Link
-                                    href="/about"
-                                    className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 hover:text-neutral-900 transition"
-                                >
-                                    Kalendář
-                                </Link>
-                                <Link
-                                    href="/about"
-                                    className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 hover:text-neutral-900 transition"
-                                >
-                                    O projektu
-                                </Link>
+                                <Link href="/" className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 transition">Úvod</Link>
+                                <Link href="/learn" className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 transition">Učení</Link>
+                                <Link href="/about" className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 transition">Kalendář</Link>
+                                <Link href="/about" className="rounded-xl px-3 py-2 text-sm text-neutral-700 hover:bg-black/5 transition">O projektu</Link>
                             </div>
 
                             <div className="mx-1 h-6 w-px bg-black/10" />
 
-
-                            {/* Přihlášený nebo nepřihlášený */}
                             {loading ? null : user ? (
                                 <span className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white/70 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm">
-                  {user.email}
-                </span>
+                                    {user.email}
+                                </span>
                             ) : (
-                                <>
-                                    <Link
-                                        href="/login"
-                                        className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white/70 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm hover:bg-white hover:shadow-md transition"
-                                    >
+                                <div className="flex items-center gap-2">
+                                    <Link href="/login" className="inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white/70 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm hover:bg-white transition">
                                         Přihlásit se
                                     </Link>
-
-                                    <Link
-                                        href="/register"
-                                        className="inline-flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 hover:shadow-md transition"
-                                    >
+                                    <Link href="/register" className="inline-flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-neutral-800 transition">
                                         Začít zdarma <span className="ml-2 opacity-80">→</span>
                                     </Link>
-                                </>
+                                </div>
                             )}
                         </div>
 
-                        {/* Mobile */}
+                        {/* Mobile Controls (vždy viditelné na mobilu) */}
                         <div className="flex items-center gap-2 md:hidden">
-                            <Link
-                                href="/register"
-                                className="inline-flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm"
-                            >
-                                Začít <span className="ml-2 opacity-80">→</span>
-                            </Link>
+                            {!user && (
+                                <Link
+                                    href="/register"
+                                    className="inline-flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm"
+                                >
+                                    Začít
+                                </Link>
+                            )}
 
                             <button
+                                onClick={toggleMenu} // 3. Přidána funkce přepnutí
                                 type="button"
                                 className="grid h-10 w-10 place-items-center rounded-2xl border border-black/10 bg-white/70 shadow-sm hover:bg-white transition"
                                 aria-label="Menu"
                             >
-                                <span className="text-lg leading-none">≡</span>
+                                <span className="text-xl leading-none">{isOpen ? "✕" : "≡"}</span>
                             </button>
                         </div>
                     </div>
+
+                    {/* Mobile Menu Panel (zobrazí se při isOpen === true) */}
+                    {isOpen && (
+                        <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-black/10 bg-white/80 p-4 shadow-lg md:hidden animate-in fade-in slide-in-from-top-2">
+                            <Link href="/" className="px-2 py-2 text-sm font-medium" onClick={toggleMenu}>Úvod</Link>
+                            <Link href="/learn" className="px-2 py-2 text-sm font-medium" onClick={toggleMenu}>Učení</Link>
+                            <Link href="/about" className="px-2 py-2 text-sm font-medium" onClick={toggleMenu}>Kalendář</Link>
+                            <Link href="/about" className="px-2 py-2 text-sm font-medium" onClick={toggleMenu}>O projektu</Link>
+                            <hr className="my-2 border-black/5" />
+                            {user ? (
+                                <div className="px-2 py-2 text-sm font-semibold">{user.email}</div>
+                            ) : (
+                                <Link href="/login" className="px-2 py-2 text-sm font-semibold" onClick={toggleMenu}>Přihlásit se</Link>
+                            )}
+                        </div>
+                    )}
                 </nav>
 
-                {/* bottom hairline */}
                 <div className="h-[1px] w-full bg-black/10" />
             </div>
         </header>
