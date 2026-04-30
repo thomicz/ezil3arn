@@ -4,24 +4,22 @@ import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
-// Všimni si, že používám NextRequest místo Request.
-// NextRequest má super pomocné metody pro práci s cookies.
 export async function GET(req: NextRequest) {
     try {
-        // 1. Získání tokenu (NextRequest nám to dost usnadňuje)
+        // Získání tokenu
         const token = req.cookies.get("session")?.value;
 
         if (!token) {
             return NextResponse.json({ error: "Neautorizovaný přístup" }, { status: 401 });
         }
 
-        // 2. Ověření tokenu
+        // Ověření tokenu
         let decoded;
+
         try {
             decoded = jwt.verify(token, process.env.JWT_SECRET!);
-        } catch (error) {
-            // Pokud token vypršel nebo je upravený
-
+        }
+        catch (error) {
             return NextResponse.json({ error: "Neplatný token" }, { status: 401 });
         }
 

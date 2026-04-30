@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import {redirect} from "next/dist/client/components/redirect";
 
 // Hlavní endpoint pro přihlášení
 export async function POST(req: Request) {
