@@ -4,13 +4,18 @@ import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
-// Všimni si, že používám NextRequest místo Request.
-// NextRequest má super pomocné metody pro práci s cookies.
-export async function GET(req: NextRequest) {
+// Upravili jsme typ params na Promise
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
     try {
-        // 1. Získání tokenu (NextRequest nám to dost usnadňuje)
-        const token = req.cookies.get("session")?.value;
+        // 0. V Next.js 15+ MUSÍŠ params "vybalit" pomocí await
+        const { id } = await params;
+        const quizIdFromUrl = id;
 
+        // 1. Získání tokenu
+        const token = req.cookies.get("session")?.value;
         if (!token) {
             return NextResponse.json({ error: "Neautorizovaný přístup" }, { status: 401 });
         }
@@ -20,41 +25,43 @@ export async function GET(req: NextRequest) {
         try {
             decoded = jwt.verify(token, process.env.JWT_SECRET!);
         } catch (error) {
-            // Pokud token vypršel nebo je upravený
-
             return NextResponse.json({ error: "Neplatný token" }, { status: 401 });
         }
 
-        // 3. Získání ID uživatele z tokenu
-        // POZOR: Tady záleží na tom, jak přesně jsi token vytvořil při přihlašování!
-        // Předpokládám, že jsi do payloadu uložil 'id' (např. jwt.sign({ id: user.id }, secret))
         const userId = (decoded as any).sub;
-
         if (!userId) {
             return NextResponse.json({ error: "Token neobsahuje ID uživatele" }, { status: 400 });
         }
 
-        // 4. Teď už víme, kdo je přihlášený -> stáhneme jeho kvízy z DB
+        // 3. Stáhneme uživatele a jeho kvízy
         const user = await prisma.user.findUnique({
-            where: {
-                id: userId, // Zde použijeme dynamické ID z tokenu
-            },
-            select: {
-                quizzes: true,
-            },
+            where: { id: userId },
+            select: { quizzes: true },
         });
 
-        if (!user) {
-            return NextResponse.json({ error: "Uživatel nenalezen" }, { status: 404 });
+        if (!user || !user.quizzes) {
+            return NextResponse.json({ error: "Uživatel nebo kvízy nenalezeny" }, { status: 404 });
         }
 
-        // Vrátíme kvízy konkrétního uživatele
-        return NextResponse.json(user.quizzes);
+        // 4. Filtrace v JSONu
+        const allQuizzes = user.quizzes as any[];
+
+        // Debugging: Tady uvidíš, co se s čím porovnává
+        console.log("Hledám ID z URL:", quizIdFromUrl);
+
+        const foundQuiz = allQuizzes.find((q: any) => q.id === quizIdFromUrl);
+
+        if (!foundQuiz) {
+            // Pokud to stále hází 404, koukni do konzole na log výše
+            return NextResponse.json({ error: "Konkrétní kvíz nebyl nalezen" }, { status: 404 });
+        }
+
+        return NextResponse.json(foundQuiz);
 
     } catch (error) {
-        console.error("Chyba při načítání kvízů z DB:", error);
+        console.error("Chyba při načítání kvízu z DB:", error);
         return NextResponse.json(
-            { error: "Nepodařilo se načíst kvízy ze serveru" },
+            { error: "Nepodařilo se načíst kvíz ze serveru" },
             { status: 500 }
         );
     }
