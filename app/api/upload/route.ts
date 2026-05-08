@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { PrismaClient } from "@prisma/client";
 import { isAuthenticated } from "@/lib/auth";
+import {Int} from "effect/Schema";
 
 // Prevence vzniku příliš mnoha instancí Prismy v Next.js vývojovém režimu
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -12,11 +13,19 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: NextRequest) {
     try {
-        //Pokud je uživa
         let userID = isAuthenticated(req);
 
         //Pokud je uživatel přihlášený
         if (userID != null) {
+
+            const { searchParams } = new URL(req.url);
+            const subjectIdRaw = searchParams.get("id");
+
+            if (!subjectIdRaw) {
+                return NextResponse.json({ error: "Chybí ID předmětu v URL." }, { status: 400 });
+            }
+
+            const subjectId = parseInt(subjectIdRaw);
 
             if (!process.env.GEMINI_API_KEY) {
                 return NextResponse.json({error: "Chybí API klíč v .env"}, {status: 500});
@@ -46,9 +55,6 @@ export async function POST(req: NextRequest) {
         {
           "title": "Stručný název, který popisuje obsah",
           "notes": "Jeden dlouhý textový řetězec (string) obsahující stručné shrnutí v odrážkách. NEPOUŽÍVEJ OBJEKTY ANI POLE.",
-          "flashcards": [
-            { "question": "Otázka", "answer": "Odpověď" }
-          ],
           "quiz": [
             { 
               "question": "Otázka?", 
@@ -78,39 +84,19 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({error: "AI vrátilo data v nečitelném formátu."}, {status: 500});
             }
 
-            // Uložení do databáze k přihlášenému uživateli
-            console.log(`DB: Ukládám data pro uživatele s ID ${userID}...`);
+            console.log(`DB: Ukládám kvíz pro uživatele ${userID} do předmětu ${subjectId}...`);
 
-            const user = await prisma.user.findUnique({
-                where: {id: userID},
-                select: {quizzes: true}
-            });
-
-            // Pokud uživatel neexistuje
-            if (!user) {
-                return NextResponse.json({error: `Uživatel s ID ${userID} nebyl v databázi nalezen.`}, {status: 404});
-            }
-
-            // Zajištění, že máme pole, i když bylo v DB zatím prázdné
-            const currentQuizzes = Array.isArray(user.quizzes) ? user.quizzes : [];
-
-            const newQuizEntry = {
-                id: crypto.randomUUID(),
-                title: parsedData.title,
-                createdAt: new Date().toISOString(),
-                notes: parsedData.notes,
-                flashcards: parsedData.flashcards,
-                quiz: parsedData.quiz
-            };
-
-            await prisma.user.update({
-                where: {id: userID},
+            const newQuiz = await prisma.quiz.create({
                 data: {
-                    quizzes: [...currentQuizzes, newQuizEntry]
+                    title: parsedData.title,
+                    notes: parsedData.notes,
+                    quizData: parsedData.quiz,
+                    userId: userID,
+                    subjectId: subjectId
                 }
             });
 
-            console.log("DB: Úspěšně uloženo.");
+            console.log("DB: Úspěšně uloženo do tabulky Quiz.");
 
             // Odeslání dat na frontend
             return NextResponse.json(parsedData);

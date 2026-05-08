@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,9 +9,38 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  name     String?
-  password String
-  quizzes  Json   @default("[]") // Defaultně prázdné pole
+  id        Int      @id @default(autoincrement()) // Přidány závorky
+  email     String   @unique
+  name      String?
+  password  String
+  quizzes   Quiz[]
+
+  @@map("User")
+}
+
+model Subject {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  color     String?  // Přidal jsem otazník, protože v DB máš u některých NULL
+
+  quizzes   Quiz[]
+
+  @@map("Subject")
+}
+
+model Quiz {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now()) @map("created_at")
+  title       String
+  notes       String?  @db.Text // Pro dlouhé texty z AI je lepší specifikovat Text
+  quizData    Json     @map("quiz_data")
+
+  // OPRAVA: userId musí být Int, aby sedělo na User.id
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  subjectId   Int      @map("subject_id")
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+
+  @@map("Quiz")
 }

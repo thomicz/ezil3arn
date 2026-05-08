@@ -19,6 +19,7 @@ async function fetchQuizzes(): Promise<Quiz[]> {
     try {
         const response = await fetch('../../../api/quizzes');
 
+
         if (!response.ok) {
             throw new Error('Chyba při načítání kvízů ze serveru');
         }

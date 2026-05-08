@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type ApiResult = {
     notes?: string;
@@ -9,6 +10,9 @@ type ApiResult = {
 };
 
 export default function UploadPage() {
+    const searchParams = useSearchParams(); // Inicializace hooku
+    const subjectId = searchParams.get("id"); // Vytáhne tu '5' z URL ?id=5
+
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const [file, setFile] = useState<File | null>(null);
@@ -83,7 +87,7 @@ export default function UploadPage() {
             const form = new FormData();
             form.append("file", file);
 
-            const res = await fetch("/api/upload", { method: "POST", body: form });
+            const res = await fetch(`/api/upload?id=${subjectId}`, { method: "POST", body: form });
             if (!res.ok) {
                 const text = await res.text().catch(() => "");
                 throw new Error(text || `Server vrátil chybu ${res.status}`);
@@ -356,27 +360,6 @@ export default function UploadPage() {
                             <p className="whitespace-pre-wrap text-sm text-neutral-600 leading-relaxed">
                                 {result?.notes ?? <span className="text-neutral-400 italic">Zatím nejsou k dispozici žádná data.</span>}
                             </p>
-                        </Card>
-
-                        <Card title="Flashcards">
-                            {result?.flashcards?.length ? (
-                                <ul className="space-y-4">
-                                    {result.flashcards.slice(0, 8).map((c, idx) => (
-                                        <li key={idx} className="rounded-2xl border border-neutral-200/80 bg-neutral-50/50 p-5 transition-colors hover:bg-neutral-50">
-                                            <div className="flex gap-3">
-                                                <span className="font-bold text-neutral-300">Q</span>
-                                                <div className="text-sm font-semibold text-neutral-900">{c.question}</div>
-                                            </div>
-                                            <div className="mt-3 flex gap-3">
-                                                <span className="font-bold text-emerald-300">A</span>
-                                                <div className="text-sm text-neutral-600">{c.answer}</div>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <span className="text-sm text-neutral-400 italic">Zatím nejsou k dispozici žádná data.</span>
-                            )}
                         </Card>
 
                         <Card title="Cvičný Kvíz">

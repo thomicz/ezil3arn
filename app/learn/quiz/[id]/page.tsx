@@ -118,6 +118,7 @@ export default function QuizzesPage() {
 
     const answeredCount = useMemo(() => {
         if (!data) return 0;
+
         return data.questions.reduce((acc, qq) => {
             const v = answers[String(qq.id)];
             if (qq.type === "short") return acc + (typeof v === "string" && v.trim().length > 0 ? 1 : 0);
@@ -133,9 +134,11 @@ export default function QuizzesPage() {
             const v = answers[String(qq.id)];
             if (qq.type === "mcq") {
                 if (typeof v === "number" && v === qq.answerIndex) correct++;
-            } else if (qq.type === "tf") {
+            }
+            else if (qq.type === "tf") {
                 if (typeof v === "boolean" && v === qq.answer) correct++;
-            } else if (qq.type === "short") {
+            }
+            else if (qq.type === "short") {
                 if (typeof v === "string") {
                     const a = v.trim().toLowerCase();
                     const b = qq.answer.trim().toLowerCase();
