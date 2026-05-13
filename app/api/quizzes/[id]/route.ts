@@ -10,30 +10,29 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        // 0. V Next.js 15+ MUSÍŠ params "vybalit" pomocí await
         const { id } = await params;
         const quizIdFromUrl = id;
 
-        // 1. Získání tokenu
         const token = req.cookies.get("session")?.value;
         if (!token) {
             return NextResponse.json({ error: "Neautorizovaný přístup" }, { status: 401 });
         }
 
-        // 2. Ověření tokenu
         let decoded;
+
         try {
             decoded = jwt.verify(token, process.env.JWT_SECRET!);
-        } catch (error) {
+        }
+        catch (error) {
             return NextResponse.json({ error: "Neplatný token" }, { status: 401 });
         }
 
         const userId = (decoded as any).sub;
+
         if (!userId) {
             return NextResponse.json({ error: "Token neobsahuje ID uživatele" }, { status: 400 });
         }
 
-        // 3. Stáhneme uživatele a jeho kvízy
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { quizzes: true },
@@ -43,7 +42,6 @@ export async function GET(
             return NextResponse.json({ error: "Uživatel nebo kvízy nenalezeny" }, { status: 404 });
         }
 
-        // 4. Filtrace v JSONu
         const allQuizzes = user.quizzes as any[];
 
         // Debugging: Tady uvidíš, co se s čím porovnává
