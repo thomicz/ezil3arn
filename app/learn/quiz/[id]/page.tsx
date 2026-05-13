@@ -69,7 +69,7 @@ export default function QuizzesPage() {
 
                 if (!cancelled) {
                     // Převod AI formátu na formát frontendu
-                    const mappedQuestions: QuizQuestion[] = (json.quiz || []).map((item: any, index: number) => {
+                    const mappedQuestions: QuizQuestion[] = (json.quizData || []).map((item: any, index: number) => {
                         let correctIdx = item.options?.findIndex((opt: string) => opt === item.answer);
                         if (correctIdx === -1) correctIdx = 0; // fallback
 
