@@ -17,7 +17,7 @@ interface Quiz {
 // Reálný fetch na API routu
 async function fetchQuizzes(): Promise<Quiz[]> {
     try {
-        const response = await fetch('../../../api/quizzes');
+        const response = await fetch('../../../api/quizzes?subjectId=4');
 
         if (!response.ok) {
             throw new Error('Chyba při načítání kvízů ze serveru');
