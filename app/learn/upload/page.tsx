@@ -1,8 +1,6 @@
 "use client";
 
-export const dynamic = "force-dynamic"
-
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 type ApiResult = {
@@ -11,9 +9,10 @@ type ApiResult = {
     quiz?: { question: string; options?: string[]; answer: string }[];
 };
 
-export default function UploadPage() {
-    const searchParams = useSearchParams(); // Inicializace hooku
-    const subjectId = searchParams.get("id"); // Vytáhne tu '5' z URL ?id=5
+// 1. Logika a JSX přesunuty do vnitřní komponenty, která bezpečně konzumuje useSearchParams
+function UploadPageContent() {
+    const searchParams = useSearchParams();
+    const subjectId = searchParams.get("id"); // Bezpečně vytáhne ID uvnitř Suspense
 
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -401,6 +400,19 @@ export default function UploadPage() {
     );
 }
 
+// 2. Hlavní defaultní export, který tvoří Suspense Boundary
+export default function UploadPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center bg-neutral-50 text-neutral-500">
+                Načítání aplikace...
+            </div>
+        }>
+            <UploadPageContent />
+        </Suspense>
+    );
+}
+
 /* ----------------- Small UI Helpers ----------------- */
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
@@ -441,12 +453,14 @@ function UploadIcon() {
                 stroke="currentColor"
                 strokeWidth="2.5"
                 strokeLinecap="round"
+                strokeLinejoin="round"
             />
             <path
                 d="M5 20h14a3 3 0 0 0 1-5.83"
                 stroke="currentColor"
                 strokeWidth="2.5"
                 strokeLinecap="round"
+                strokeLinejoin="round"
             />
         </svg>
     );
