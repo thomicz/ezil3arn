@@ -8,20 +8,16 @@ import useAuth from "../app/hooks/useAuth";
 // ---------------------------------------------------------------------------
 // UserDropdown — přihlášený uživatel s rozbalovacím menu
 // ---------------------------------------------------------------------------
-function UserDropdown({ email }: { email: string }) {
+function UserDropdown({
+                          email,
+                          onSignOut
+                      }: {
+    email: string;
+    onSignOut: () => void;
+}) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const router = useRouter();
-    // Přizpůsob importu svému auth provideru (Firebase, NextAuth, Supabase…)
-    // import { signOut } from "firebase/auth";
-    // import { auth } from "@/lib/firebase";
-
-    const handleSignOut = async () => {
-        // await signOut(auth);         // Firebase
-        // await signOut();             // NextAuth
-        // await supabase.auth.signOut(); // Supabase
-        router.push("/");
-    };
 
     // Zavřít při kliknutí mimo
     useEffect(() => {
@@ -43,11 +39,11 @@ function UserDropdown({ email }: { email: string }) {
                 className="user-btn group flex items-center gap-2 rounded-2xl border border-black/10 bg-white/70 px-3 py-2 shadow-sm transition hover:bg-white hover:shadow-md"
             >
                 {/* Avatar */}
-                <span className="avatar grid h-7 w-7 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white shadow-inner">
+                <span className="avatar grid h-7 w-7 place-items-center rounded-xl bg-linear-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white shadow-inner">
                     {initials}
                 </span>
 
-                <span className="max-w-[140px] truncate text-sm font-semibold text-neutral-800">
+                <span className="max-w-35 truncate text-sm font-semibold text-neutral-800">
                     {email}
                 </span>
 
@@ -104,7 +100,7 @@ function UserDropdown({ email }: { email: string }) {
                     {/* Sign out */}
                     <div className="border-t border-black/5 p-1.5">
                         <button
-                            onClick={handleSignOut}
+                            onClick={onSignOut}
                             className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
                         >
                             <span className="grid h-7 w-7 place-items-center rounded-lg bg-red-50 text-red-400">
@@ -133,6 +129,17 @@ function UserDropdown({ email }: { email: string }) {
 // Navbar
 // ---------------------------------------------------------------------------
 export default function Navbar() {
+    const router = useRouter();
+
+    const handleSignOut = async () => {
+        await fetch('..//api/auth/logout', {
+            method: 'POST'
+        });
+
+        router.push('/');
+        router.refresh();
+    };
+
     const { user, loading } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -155,7 +162,7 @@ export default function Navbar() {
 
     return (
         <header className={`sticky top-0 z-50 w-full transition-shadow duration-300 ${scrolled ? "shadow-[0_2px_24px_rgba(0,0,0,0.06)]" : ""}`}>
-            <div className="bg-white/65 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/55">
+            <div className="bg-white/65 backdrop-blur-2xl supports-backdrop-filter:bg-white/55">
                 {/* top accent line */}
                 <div className="h-[1.5px] w-full bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 opacity-70" />
 
@@ -165,7 +172,7 @@ export default function Navbar() {
                         {/* ── Brand ── */}
                         <Link href="/" className="group flex items-center gap-3">
                             <span className="relative grid h-9 w-9 place-items-center rounded-xl border border-black/10 bg-white/80 shadow-sm transition duration-200 group-hover:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]">
-                                <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-indigo-400 to-pink-400" />
+                                <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-linear-to-br from-indigo-400 to-pink-400" />
                                 <span className="text-[13px] font-black tracking-tight text-neutral-900">SC</span>
                             </span>
                             <span className="text-[15px] font-bold tracking-tight text-neutral-900 sm:text-base">
@@ -194,7 +201,10 @@ export default function Navbar() {
                             {loading ? (
                                 <div className="h-9 w-24 animate-pulse rounded-2xl bg-black/5" />
                             ) : user ? (
-                                <UserDropdown email={user.email ?? ""} />
+                                <UserDropdown
+                                    email={user.email ?? ""}
+                                    onSignOut={handleSignOut}
+                                />
                             ) : (
                                 <div className="flex items-center gap-2">
                                     <Link
@@ -276,7 +286,7 @@ export default function Navbar() {
                                             Profil
                                         </Link>
                                         <button
-                                            onClick={toggleMenu}
+                                            onClick={handleSignOut}
                                             className="flex w-full items-center rounded-xl px-3 py-2.5 text-[14px] font-medium text-red-500 transition hover:bg-red-50"
                                         >
                                             Odhlásit se
