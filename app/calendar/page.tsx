@@ -115,7 +115,8 @@ export default function CalendarPage() {
                             <Calendar
                                 mode="single"
                                 selected={date}
-                                onSelect={setDate}
+                                // Bezpečné přetypování pro onSelect, aby TypeScript nehlásil nesoulad typů
+                                onSelect={(newDate) => setDate(newDate)}
                                 className="w-full rounded-2xl border border-neutral-200 bg-white p-4 [--cell-size:3rem] sm:[--cell-size:3.5rem] lg:[--cell-size:3.25rem] xl:[--cell-size:3.75rem]"
                                 classNames={{
                                     root: "w-full",
