@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 
 export type Flashcard = {
     id?: string | number;
@@ -8,53 +9,57 @@ export type Flashcard = {
     answer: string;
 };
 
-type Props = {
-    /** endpoint, který vrací JSON: Flashcard[] */
-    endpoint?: string;
-    /** fallback data (když nechceš fetch) */
-    initialCards?: Flashcard[];
-    /** title nad deckem */
-    title?: string;
-};
+export default function FlashcardDeckPage() {
+    const params = useParams();
+    const setId = params.id as string;
 
-export default function FlashcardDeck({
-                                          endpoint = "../api/flashcards",
-                                          initialCards,
-                                          title = "Flashcards",
-                                      }: Props) {
-    const [cards, setCards] = useState<Flashcard[]>(initialCards ?? []);
+    const [cards, setCards] = useState<Flashcard[]>([]);
+    const [title, setTitle] = useState("Flashcards");
     const [idx, setIdx] = useState(0);
     const [flipped, setFlipped] = useState(false);
 
-    const [loading, setLoading] = useState(!initialCards);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const total = cards.length;
     const current = cards[idx];
 
-    // fetch from backend (pokud nejsou initialCards)
+    // Načti konkrétní set podle ID — stejný pattern jako QuizzesPage
     useEffect(() => {
-        if (initialCards) return;
+        if (!setId) return;
 
         let cancelled = false;
+
         (async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                const res = await fetch(endpoint, { cache: "no-store" });
-                if (!res.ok) throw new Error(`Server vrátil ${res.status}`);
+                const res = await fetch(`/api/quizzes/${setId}`, { cache: "no-store" });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error((errData as { error?: string }).error ?? `Server vrátil ${res.status}`);
+                }
 
-                const data = (await res.json()) as Flashcard[];
-                if (!Array.isArray(data)) throw new Error("Neplatný formát: čekám pole flashcards.");
+                const json = await res.json();
 
                 if (!cancelled) {
-                    setCards(data);
+                    // quizData je pole { question, answer, options?, explanation? }
+                    const rawCards: Flashcard[] = (json.quizData ?? []).map(
+                        (item: { question: string; answer: string }, index: number) => ({
+                            id: index,
+                            question: item.question,
+                            answer: item.answer,
+                        })
+                    );
+
+                    setCards(rawCards);
+                    setTitle(json.title ?? "Flashcards");
                     setIdx(0);
                     setFlipped(false);
                 }
             } catch (e: unknown) {
-                if (!cancelled) setError(e instanceof Error ? e.message : "Něco se pokazilo.");
+                if (!cancelled) setError(e instanceof Error ? e.message : "Nepodařilo se načíst flashcards.");
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -63,9 +68,9 @@ export default function FlashcardDeck({
         return () => {
             cancelled = true;
         };
-    }, [endpoint, initialCards]);
+    }, [setId]);
 
-    // klávesové zkratky
+    // Klávesové zkratky
     useEffect(() => {
         function onKeyDown(e: KeyboardEvent) {
             if (e.key === " " || e.key === "Enter") {
@@ -101,8 +106,7 @@ export default function FlashcardDeck({
     function shuffle() {
         if (cards.length < 2) return;
         const copy = [...cards];
-        for (let i = copy.length - 1; i > 0; i--)
-        {
+        for (let i = copy.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [copy[i], copy[j]] = [copy[j], copy[i]];
         }
@@ -112,29 +116,30 @@ export default function FlashcardDeck({
     }
 
     return (
-        <section className="relative overflow-hidden bg-white text-neutral-900">
-            {/* background (jemná mřížka + blob jako ve zbytku) */}
+        <main className="relative min-h-screen overflow-hidden bg-white text-neutral-900">
+            {/* Background decoration */}
             <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -top-40 left-1/2 h-130 w-130 -translate-x-1/2 rounded-full bg-linear-to-b from-violet-200/60 to-transparent blur-2xl" />
+                <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-gradient-to-b from-sky-200/60 to-transparent blur-2xl" />
                 <div className="absolute inset-0 opacity-[0.08]" style={gridBgStyle} />
             </div>
 
             <div className="relative mx-auto max-w-4xl px-4 py-12">
-                {/* badge */}
+                {/* Badge */}
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs shadow-sm backdrop-blur">
-          <span className="inline-flex h-6 items-center rounded-full bg-neutral-900 px-2 text-[11px] font-semibold text-white">
-            AI
-          </span>
-                    <span className="text-neutral-700">Klikni pro otočení · mezerník/enter</span>
+                    <span className="inline-flex h-6 items-center rounded-full bg-neutral-900 px-2 text-[11px] font-semibold text-white">
+                        FLASHCARDS
+                    </span>
+                    <span className="text-neutral-700">Klikni pro otočení · mezerník / enter</span>
                 </div>
 
+                {/* Header */}
                 <div className="flex flex-wrap items-end justify-between gap-3">
                     <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
                         {title} <span className="text-neutral-400">deck</span>
                     </h1>
 
                     <div className="rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs text-neutral-700 shadow-sm backdrop-blur">
-                        {progressLabel}
+                        {loading ? "Načítám…" : progressLabel}
                     </div>
                 </div>
 
@@ -142,18 +147,19 @@ export default function FlashcardDeck({
                     Tip: ← / → pro navigaci, mezerník pro otočení, Esc vrátí na otázku.
                 </p>
 
+                {/* Card */}
                 <div className="mt-8 rounded-2xl border border-black/10 bg-white/70 p-6 shadow-sm backdrop-blur">
                     {loading ? (
-                        <div className="text-sm text-neutral-600">Načítám flashcards…</div>
+                        <div className="py-16 text-center text-sm text-neutral-500">Načítám flashcards ze serveru…</div>
                     ) : error ? (
                         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
                             {error}
                         </div>
                     ) : !current ? (
-                        <div className="text-sm text-neutral-600">Žádné flashcards.</div>
+                        <div className="py-16 text-center text-sm text-neutral-500">Žádné flashcards v tomto setu.</div>
                     ) : (
                         <>
-                            {/* FLIP CARD */}
+                            {/* Flip card */}
                             <button
                                 type="button"
                                 onClick={() => setFlipped((v) => !v)}
@@ -162,24 +168,24 @@ export default function FlashcardDeck({
                             >
                                 <div className="perspective">
                                     <div className={`card3d ${flipped ? "flipped" : ""}`}>
-                                        {/* front */}
+                                        {/* Front */}
                                         <div className="face front">
                                             <div className="mb-3 text-xs font-semibold text-neutral-500">OTÁZKA</div>
                                             <div className="text-balance text-xl font-semibold sm:text-2xl">
                                                 {current.question}
                                             </div>
-                                            <div className="mt-5 text-sm text-neutral-500">
+                                            <div className="mt-5 text-sm text-neutral-400">
                                                 Klikni pro odpověď
                                             </div>
                                         </div>
 
-                                        {/* back */}
+                                        {/* Back */}
                                         <div className="face back">
                                             <div className="mb-3 text-xs font-semibold text-neutral-500">ODPOVĚĎ</div>
                                             <div className="text-balance text-lg text-neutral-800 sm:text-xl">
                                                 {current.answer}
                                             </div>
-                                            <div className="mt-5 text-sm text-neutral-500">
+                                            <div className="mt-5 text-sm text-neutral-400">
                                                 Klikni zpět na otázku
                                             </div>
                                         </div>
@@ -187,7 +193,25 @@ export default function FlashcardDeck({
                                 </div>
                             </button>
 
-                            {/* controls */}
+                            {/* Progress dots */}
+                            <div className="mt-5 flex justify-center gap-1.5">
+                                {cards.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        onClick={() => { setIdx(i); setFlipped(false); }}
+                                        className={[
+                                            "h-1.5 rounded-full transition-all",
+                                            i === idx
+                                                ? "w-5 bg-neutral-900"
+                                                : "w-1.5 bg-neutral-300 hover:bg-neutral-400",
+                                        ].join(" ")}
+                                        aria-label={`Karta ${i + 1}`}
+                                    />
+                                ))}
+                            </div>
+
+                            {/* Controls */}
                             <div className="mt-6 flex flex-wrap items-center gap-3">
                                 <button
                                     type="button"
@@ -226,50 +250,50 @@ export default function FlashcardDeck({
                         </>
                     )}
                 </div>
-
-                {/* CSS for 3D flip */}
-                <style jsx>{`
-          .perspective {
-            perspective: 1100px;
-          }
-          .card3d {
-            position: relative;
-            width: 100%;
-            min-height: 260px;
-            transform-style: preserve-3d;
-            transition: transform 550ms cubic-bezier(0.2, 0.8, 0.2, 1);
-          }
-          .card3d.flipped {
-            transform: rotateY(180deg);
-          }
-          .face {
-            position: absolute;
-            inset: 0;
-            backface-visibility: hidden;
-            border-radius: 16px;
-            border: 1px solid rgba(0, 0, 0, 0.10);
-            background: rgba(255, 255, 255, 0.85);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-            padding: 22px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-          }
-          .back {
-            transform: rotateY(180deg);
-          }
-          @media (min-width: 640px) {
-            .card3d {
-              min-height: 320px;
-            }
-            .face {
-              padding: 28px;
-            }
-          }
-        `}</style>
             </div>
-        </section>
+
+            <style jsx>{`
+                .perspective {
+                    perspective: 1100px;
+                }
+                .card3d {
+                    position: relative;
+                    width: 100%;
+                    min-height: 260px;
+                    transform-style: preserve-3d;
+                    transition: transform 550ms cubic-bezier(0.2, 0.8, 0.2, 1);
+                }
+                .card3d.flipped {
+                    transform: rotateY(180deg);
+                }
+                .face {
+                    position: absolute;
+                    inset: 0;
+                    backface-visibility: hidden;
+                    border-radius: 16px;
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                    background: rgba(255, 255, 255, 0.85);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+                    padding: 22px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                }
+                .back {
+                    transform: rotateY(180deg);
+                }
+                @media (min-width: 640px) {
+                    .card3d {
+                        min-height: 320px;
+                    }
+                    .face {
+                        padding: 28px;
+                    }
+                }
+            `}</style>
+        </main>
     );
 }
 

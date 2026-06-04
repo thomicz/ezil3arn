@@ -52,7 +52,6 @@ export async function GET(
         const foundQuiz = allQuizzes.find((q: any) => q.id === quizIdFromUrl);
 
         if (!foundQuiz) {
-            // Pokud to stále hází 404, koukni do konzole na log výše
             return NextResponse.json({ error: "Konkrétní kvíz nebyl nalezen" }, { status: 404 });
         }
 
