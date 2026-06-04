@@ -339,7 +339,7 @@ export default function LearnPage() {
                                     Rychlé otázky podle tématu + vysvětlení odpovědí, aby sis odnesl logiku.
                                 </p>
                                 <Link
-                                    href="/learn/quizzes"
+                                    href="/learn/quiz"
                                     className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-900 transition-colors hover:text-neutral-600"
                                 >
                                     Spustit kvíz
